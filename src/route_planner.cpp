@@ -1,6 +1,7 @@
 #include "route_planner.h"
 #include <algorithm>
 using std::sort;
+using std::reverse;
 
 RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, float end_x, float end_y): m_Model(model) {
     // Convert inputs to percentage:
@@ -88,14 +89,20 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
     // TODO: Implement your solution here.
 
     RouteModel::Node *parent = current_node->parent;
+    path_found.push_back(*current_node);
 
     while (parent != nullptr) {
         distance += current_node->distance(*parent);
         current_node = parent;
+        path_found.push_back(*current_node);
         parent = current_node->parent;
     }
 
-    distance *= m_Model.MetricScale(); // Multiply the distance by the scale of the map to get meters.
+    // The path of nodes should be ordered from starting node to ending node
+    reverse(path_found.begin(), path_found.end());
+
+    // Multiply the distance by the scale of the map to get meters.
+    distance *= m_Model.MetricScale();
     return path_found;
 
 }
