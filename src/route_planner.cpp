@@ -11,8 +11,8 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
     end_y *= 0.01;
 
     // TODO 2: Use the m_Model.FindClosestNode method to find the closest nodes to the starting and ending coordinates.
-    RouteModel::Node start = model->FindClosestNode(start_x, start_y);
-    RouteModel::Node goal = model->FindClosestNode(end_x, end_y);
+    RouteModel::Node start = model.FindClosestNode(start_x, start_y);
+    RouteModel::Node goal = model.FindClosestNode(end_x, end_y);
 
     // Store the nodes you find in the RoutePlanner's start_node and end_node attributes.
     this->start_node = &start;
@@ -43,7 +43,7 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     current_node->FindNeighbors();
 
     // Iterate through the list of unvisited neighhbors
-    for (Node* ptr_neighbor : current_node->neighbors) {
+    for (RouteModel::Node* ptr_neighbor : current_node->neighbors) {
         ptr_neighbor->parent = current_node;
         ptr_neighbor->h_value = CalculateHValue(ptr_neighbor);
         ptr_neighbor->g_value = current_node->g_value + ptr_neighbor->distance(*current_node);
@@ -131,8 +131,8 @@ void RoutePlanner::AStarSearch() {
         current_node = NextNode();
 
         // Once the goal is reached, map the final route
-        if (next_node == this->end_node) {
-            m_Model->path = ConstructFinalPath(this->end_node);
+        if (current_node == this->end_node) {
+            m_Model.path = ConstructFinalPath(this->end_node);
         } else {
             // Otherwise, retrieve any unvisited neighbors of the current node
             AddNeighbors(current_node);
