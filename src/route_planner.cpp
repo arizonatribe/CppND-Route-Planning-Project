@@ -11,12 +11,12 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
     end_y *= 0.01;
 
     // TODO 2: Use the m_Model.FindClosestNode method to find the closest nodes to the starting and ending coordinates.
-    RouteModel::Node start = model.FindClosestNode(start_x, start_y);
-    RouteModel::Node goal = model.FindClosestNode(end_x, end_y);
+    RouteModel::Node *start = &model.FindClosestNode(start_x, start_y);
+    RouteModel::Node *goal = &model.FindClosestNode(end_x, end_y);
 
     // Store the nodes you find in the RoutePlanner's start_node and end_node attributes.
-    this->start_node = &start;
-    this->end_node = &goal;
+    this->start_node = start;
+    this->end_node = goal;
 }
 
 
@@ -91,7 +91,7 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
     RouteModel::Node *parent = current_node->parent;
     path_found.push_back(*current_node);
 
-    while (parent != nullptr) {
+    while (current_node != this->start_node) {
         distance += current_node->distance(*parent);
         current_node = parent;
         path_found.push_back(*current_node);
@@ -124,6 +124,11 @@ void RoutePlanner::AStarSearch() {
     // This is because if `start_node` is the same as `end_node`,
     // adding neighboring nodes will be skipped.
     this->open_list.push_back(this->start_node);
+
+    // Mark the starting node as visited,
+    // all the neighboring nodes will themselves
+    // be marked visited as they're expanded
+    this->start_node->visited = true;
 
     // As long as there are unvisited nodes in the open list...
     while (this->open_list.size() > 0) {
