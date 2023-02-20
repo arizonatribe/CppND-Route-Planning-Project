@@ -29,6 +29,56 @@ static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
     return std::move(contents);
 }
 
+bool validateRange(int x, int y) {
+    return x >= 0 && y >= 0 && x <= 100 && y <= 100;
+}
+
+struct Coordinates {
+    float start_x{0.0};
+    float start_y{0.0};
+    float end_x{100.0};
+    float end_y{100.0};
+};
+
+Coordinates parseCoordinates() {
+    Coordinates coords;
+
+    float start_x;
+    float start_y;
+
+    do {
+        cout << "Provide the coordinates (lat/lon) for the starting location" << "\n";
+        cout << "(must be between 0 and 100)" << "\n";
+        cout << "  starting latitude 'x': " << "\n";
+        cin >> start_x;
+        cout << "  starting longitude 'y': " << "\n";
+        cin >> start_y;
+    } while (!validateRange(start_x, start_y));
+
+    coords.start_x = start_x;
+    coords.start_y = start_y;
+
+    float end_x;
+    float end_y;
+
+    do {
+        cout << "Provide the coordinates (lat/lon) for the ending location" << "\n";
+        cout << "(must be between 0 and 100)" << "\n";
+        cout << "  ending latitude 'x': " << "\n";
+        cin >> end_x;
+        cout << "  ending longitude 'y': " << "\n";
+        cin >> end_y;
+    } while (!validateRange(end_x, end_y));
+
+    coords.end_x = end_x;
+    coords.end_y = end_y;
+
+    cout << "Starting: (" << start_x << ", " << start_y << ")\n";
+    cout << "Ending: (" << end_x << ", " << end_y << ")\n";
+
+    return coords;
+}
+
 int main(int argc, const char **argv)
 {    
     std::string osm_data_file = "";
@@ -54,25 +104,19 @@ int main(int argc, const char **argv)
             osm_data = std::move(*data);
     }
     
-    // TODO 1: Declare floats `start_x`, `start_y`, `end_x`, and `end_y` and get
-    // user input for these values using std::cin. Pass the user input to the
-    // RoutePlanner object below in place of 10, 10, 90, 90.
-    float start_x;
-    float start_y;
-    float end_x;
-    float end_y;
-
-    cout << "Please provide the x and y coordinates (lat/lon) for the starting location" << "\n";
-    cin >> start_x >> start_y;
-
-    cout << "Please provide the x and y coordinates (lat/lon) for the destination" << "\n";
-    cin >> end_x >> end_y;
+    Coordinates coords = parseCoordinates();
 
     // Build Model.
     RouteModel model{osm_data};
 
     // Create RoutePlanner object and perform A* search.
-    RoutePlanner route_planner{model, start_x, start_y, end_x, end_y};
+    RoutePlanner route_planner{
+        model,
+        coords.start_x,
+        coords.start_y,
+        coords.end_x,
+        coords.end_y
+    };
     route_planner.AStarSearch();
 
     std::cout << "Distance: " << route_planner.GetDistance() << " meters. \n";
